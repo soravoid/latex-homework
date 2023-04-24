@@ -5,6 +5,7 @@
 \usepackage{fancyhdr}
 \usepackage{setspace}
 \usepackage{mathptmx}
+\usepackage{cite}
 
 % For equations
 \usepackage{amsmath, amssymb}
@@ -24,4 +25,14 @@
 \doublespacing
 \begin{document}
     \maketitle
+    \section*{Background} 
+    According to Greenbaum~\&~Chartier~\cite{greenbaum}, a \textbf{partial differential equation} is an expression which can be written
+    in the following form:
+    \begin{equation}
+        au_{xx} + 2bu_{xy} + cu_{yy} + du_{x} + eu_{y} + fu = g
+    \end{equation}
+    where \textit{a}, \textit{b}, \textit{c}, \textit{d}, \textit{e}, \textit{f}, and \textit{g} are functions of \textit{x} and \textit{y}.
+    \newpage 
+    \bibliographystyle{plain}
+    \bibliography{refs}{}
 \end{document}
