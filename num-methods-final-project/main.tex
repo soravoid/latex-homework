@@ -4,6 +4,7 @@
 \usepackage[margin=1truein]{geometry}
 \usepackage{fancyhdr}
 \usepackage{setspace}
+\usepackage{titlesec}
 \usepackage{mathptmx}
 \usepackage{cite}
 
@@ -23,16 +24,29 @@
 \renewcommand{\headrulewidth}{0pt}
 \setlength{\headheight}{15pt}
 
+\setlength{\parskip}{\lineskip}
+\titleformat{\section}{\normalfont\fontsize{12}{\lineskip}\bfseries}{\thesection}{1em}{}
+\titlespacing{\section}{0pt}{\parskip}{-\parskip}
+
 \doublespacing
 \begin{document}
     \maketitle
-    \section*{Background} 
-    According to Greenbaum~\&~Chartier~\cite{greenbaum}, a \textbf{partial differential equation} is an expression which can be written
+    \section*{Background}
+    According to Greenbaum~\&~Chartier~\cite{greenbaum}, a \textbf{partial differential equation} (PDE) is an expression which can be written
     in the following form:
-    \begin{equation}
+    \begin{equation}\label{eq:pde}
         au_{xx} + 2bu_{xy} + cu_{yy} + du_{x} + eu_{y} + fu = g
     \end{equation}
     where \textit{a}, \textit{b}, \textit{c}, \textit{d}, \textit{e}, \textit{f}, and \textit{g} are functions of \textit{x} and \textit{y}.
+    From this form, we are able to further classify different types of PDEs based on a quantity known as
+    the \textbf{discriminant}. It is defined as
+    \begin{equation}
+        D \equiv b^2 - ac
+    \end{equation}
+    When $D < 0$, we say that the equation is \textbf{elliptical}; if $D > 0$, then it is \textbf{hyperbolic}; 
+    otherwise, if $D = 0$, then the equation is \textbf{parabolic}. As \textit{a}, \textit{b}, and \textit{c} are functions of \textit{x} and \textit{y},
+    the type of PDE represented by Equation~(\ref{eq:pde}) can change types throughout the domain of the solution function.
+    This paper will focus on numerical solutions to differential equations to elliptical PDEs.  
     \newpage 
     \bibliographystyle{plain}
     \bibliography{refs}{}
