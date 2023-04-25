@@ -5,6 +5,7 @@
 \usepackage{fancyhdr}
 \usepackage{setspace}
 \usepackage{titlesec}
+\usepackage{graphicx}
 \usepackage{cite}
 
 % For equations
@@ -68,6 +69,21 @@
     Furthermore, we are also subject to boundary conditions $u(x,y) = g(x,y)\;\forall\:(x,y)\in S$, where \textit{S} is
     the boundary of the rectangle \textit{R}. If we have that \textit{f} and \textit{g} are continuous on \textit{R}, then 
     we are guarenteed a unique solution to Equation~(\ref{eq:poisson}).
+    \section*{Method}
+    Similar to our methods of approximating linear ordinary differential equations, we will split our rectangle into
+    $n+1$ subintervals along the \textit{x}-direction and $m+1$ subintervals of equal length along the \textit{y}-direction, where $m,n \in \mathbb{N}$.
+    Thus, we define $h=(b-a)/n$ and $k=(d-c)/m$, which gives $x_i = a  + ih,\; i=0,1,\dots,n$ and $y_j = c + kj, \; k=0,1,\dots,m$. These $(n+1)(m+1)$ points
+    form our \textbf{grid}. In our grid, there are $(n-1)(m-1)$ points that do not lie on the border, which we will call \textbf{mesh points}.
+
+    We assume that our solution function $u(x,y) \in C^4~(R)$, meaning that the fourth derivative is continuous on \textit{R}. In order to find an appropriate approximation to Equation~(\ref{eq:poisson}),
+    we apply Taylor's theorem in the \textit{x}-direction. Carrying out this procedure, we find
+    \small
+    \begin{align*}
+        u(x_i + h, y_j) &= u(x_i, y_j) + \pdv{u}{x}~(x_i,y_j)h+\frac{1}{2!}\pdv[2]{u}{x}~(x_i,y_j)h^2+\frac{1}{3!}\pdv[3]{u}{x}~(x_i,y_j)h^3+\frac{1}{4!}\pdv[4]{u}{x}~(\xi_i,y_j)h^4\\
+        u(x_i - h, y_j) &= u(x_i, y_j) - \pdv{u}{x}~(x_i,y_j)h+\frac{1}{2!}\pdv[2]{u}{x}~(x_i,y_j)h^2-\frac{1}{3!}\pdv[3]{u}{x}~(x_i,y_j)h^3+\frac{1}{4!}\pdv[4]{u}{x}~(\eta_i,y_j)h^4
+    \end{align*}
+    \normalsize
+
     \newpage 
     \bibliographystyle{plain}
     \bibliography{refs}{}
