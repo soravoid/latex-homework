@@ -29,11 +29,13 @@
 \setlength{\parskip}{\lineskip}
 \titleformat{\section}{\normalfont\fontsize{15.6}{15.6}\bfseries}{\thesection}{1em}{}
 \titlespacing{\section}{0pt}{\parskip}{-\parskip}
+\titleformat{\subsection}{\normalfont\fontsize{13.2}{13.2}\bfseries}{\thesubsection}{1em}{}
+\titlespacing{\subsection}{0pt}{\parskip}{-\parskip}
 
 \doublespacing
 \begin{document}
     \maketitle
-    \section*{Background}
+    \section{Background}
     According to Greenbaum~\&~Chartier~\cite{greenbaum}, a \textbf{partial differential equation} (PDE) is an expression which can be written
     in the following form:
     \begin{equation}\label{eq:pde}
@@ -49,7 +51,7 @@
     otherwise, if $D = 0$, then the equation is \textbf{parabolic}. As \textit{a}, \textit{b}, and \textit{c} are functions of \textit{x} and \textit{y},
     the type of PDE represented by Equation~(\ref{eq:pde}) can change types throughout the domain of the solution function.
     This paper will focus on numerical solutions to differential equations to elliptical PDEs.  
-    \section*{Problem Statement}
+    \section{Problem Statement}
     In this paper, we will specifically focus on the \textbf{Poisson~equation}~\cite{burden_faires_2011}, which is given by
     \begin{equation}\label{eq:poisson}
         \grad^2 u(x,y) \equiv \pdv[2]{u}{x}~(x,y) + \pdv[2]{u}{y}~(x,y) = f(x,y)
@@ -69,21 +71,70 @@
     Furthermore, we are also subject to boundary conditions $u(x,y) = g(x,y)\;\forall\:(x,y)\in S$, where \textit{S} is
     the boundary of the rectangle \textit{R}. If we have that \textit{f} and \textit{g} are continuous on \textit{R}, then 
     we are guarenteed a unique solution to Equation~(\ref{eq:poisson}).
-    \section*{Method}
-    Similar to our methods of approximating linear ordinary differential equations, we will split our rectangle into
+    \section{Method}
+    This section will outline the method described in \cite{burden_faires_2011}. Similar to our methods of approximating linear ordinary differential equations, we will split our rectangle into
     $n+1$ subintervals along the \textit{x}-direction and $m+1$ subintervals of equal length along the \textit{y}-direction, where $m,n \in \mathbb{N}$.
     Thus, we define $h=(b-a)/n$ and $k=(d-c)/m$, which gives $x_i = a  + ih,\; i=0,1,\dots,n$ and $y_j = c + kj, \; k=0,1,\dots,m$. These $(n+1)(m+1)$ points
-    form our \textbf{grid}. In our grid, there are $(n-1)(m-1)$ points that do not lie on the border, which we will call \textbf{mesh points}.
+    form the border and intersections of our \textbf{grid}. In our grid, there are $(n-1)(m-1)$ points that do not lie on the border, which we will call \textbf{mesh points}.
 
     We assume that our solution function $u(x,y) \in C^4~(R)$, meaning that the fourth derivative is continuous on \textit{R}. In order to find an appropriate approximation to Equation~(\ref{eq:poisson}),
-    we apply Taylor's theorem in the \textit{x}-direction. Carrying out this procedure, we find
+    we apply Taylor's theorem in the \textit{x}-direction. Carrying out this procedure around each mesh point $x_i$,\\
+    $i=1,2,\dots,n-1$, we find
     \small
     \begin{align*}
         u(x_i + h, y_j) &= u(x_i, y_j) + \pdv{u}{x}~(x_i,y_j)h+\frac{1}{2!}\pdv[2]{u}{x}~(x_i,y_j)h^2+\frac{1}{3!}\pdv[3]{u}{x}~(x_i,y_j)h^3+\frac{1}{4!}\pdv[4]{u}{x}~(\xi_i,y_j)h^4\\
         u(x_i - h, y_j) &= u(x_i, y_j) - \pdv{u}{x}~(x_i,y_j)h+\frac{1}{2!}\pdv[2]{u}{x}~(x_i,y_j)h^2-\frac{1}{3!}\pdv[3]{u}{x}~(x_i,y_j)h^3+\frac{1}{4!}\pdv[4]{u}{x}~(\eta_i,y_j)h^4
     \end{align*}
     \normalsize
+    where $\xi_i \in (x_i, x_i+h)$ and $\eta_i \in (x_i-h,x_i)$. Adding the two equations together, we find
+    \small
+    \begin{equation*}
+        u(x_i + h, y_j) + u(x_i - h, y_j) = 2u(x_i, y_j) + \pdv[2]{u}{x}~(x_i, y_j)h^2 + \frac{h^4}{4!}\left[\pdv[4]{u}{x}~(\xi_i, y_j) + \pdv[4]{u}{x}~(\eta_i, y_j)\right]
+    \end{equation*}
+    \normalsize
+    Without loss of generality, we assume $\pdv[4]{u}{x}~(\xi_i, y_j) \leq \pdv[4]{u}{x}~(\eta_i, y_j)$. Since $\pdv[4]{u}{x}~(x,y)$ is continuous and
+    \begin{equation*}
+        \pdv[4]{u}{x}~(\xi_i, y_j) \leq \frac{\pdv[4]{u}{x}~(\xi_i, y_j) + \pdv[4]{u}{x}~(\eta_i, y_j)}{2} \leq \pdv[4]{u}{x}~(\eta_i, y_j)
+    \end{equation*}
+    by the Intermediate Value theorem, there exists $\theta_i \in (x_i - h, x_i + h)$ such that
+    \begin{equation*}
+        2\pdv[4]{u}{x}~(\theta_i, y_j) = \pdv[4]{u}{x}~(\xi_i, y_j) + \pdv[4]{u}{x}~(\eta_i, y_j)
+    \end{equation*}
+    Rearranging for the second-derivative, we arrive at the \textbf{centered-difference} formula for the second derivative:
+    \begin{equation}\label{eq:x_centered_diff}
+        \pdv[2]{u}{x}~(x_i, y_j) = \frac{u(x_i + h, y_j) - 2u(x_i, y_j) + u(x_i - h, y_j)}{h^2} - \frac{h^2}{12}\pdv[4]{u}{x}~(\theta_i, y_j)
+    \end{equation}
+    Following the same procedure, we can also come up with a centered-difference formula for the second partial derivative in the \textit{y}-direction:
+    \begin{equation}\label{eq:y_centered_diff}
+        \pdv[2]{u}{y}~(x_i, y_j) = \frac{u(x_i, y_j + k) - 2u(x_i, y_j) + u(x_i, y_j-k)}{k^2} - \frac{k^2}{12}\pdv[4]{u}{y}~(x_i, \phi_j)
+    \end{equation}
+    with $\phi \in (y_j-k,y_j+k)$. Equations~(\ref{eq:x_centered_diff})~and~(\ref{eq:y_centered_diff}) can be used in Equation~(\ref{eq:poisson}) to give
+    \begin{equation}\label{eq:approx_poisson}
+        \begin{split}
+            &\frac{u(x_i + h, y_j) - 2u(x_i, y_j) + u(x_i - h, y_j)}{h^2} + \frac{u(x_i, y_j + k) - 2u(x_i, y_j) + u(x_i, y_j-k)}{k^2}\\
+            &= f(x,y) + \frac{h^2}{12}\pdv[4]{u}{x}~(\theta_i, y_j) + \frac{k^2}{12}\pdv[4]{u}{y}~(x_i, \phi_j)
+        \end{split}
+    \end{equation}
+    with our boundary conditions being
+    \begin{equation}\label{eq:bound_conds}
+        \begin{split}
+            u(x_0, y_j) = g(x_0, y_j)&\text{ and }u(x_n, y_j) = g(x_n, y_j) \;\forall\;j=0,1,\dots,m\\
+            u(x_i, y_0) = g(x_i, y_0)&\text{ and }u(x_i, y_m) = g(x_i, y_m) \;\forall\;i=0,1,\dots,n
+        \end{split}
+    \end{equation}
+    This ensures that our numerical solution is correct along the borders of our rectangle \textit{R}.
 
+    A rearrangement of Equation~(\ref{eq:approx_poisson}) yields the following:
+    \begin{equation}
+        2\left[\left(\frac{h}{k}\right)^2 + 1\right]w_{ij} - (w_{i+1,j} + w_{i-1,j})-\left(\frac{h}{k}\right)^2 (w_{i,j+1}+w_{i,j-1}) = -h^2f(x,y)
+    \end{equation}
+    where $w_{ij}\approx u(x_i, y_j)$. It follows that our boundary conditions from Equation~(\ref{eq:bound_conds}) becomes
+    \begin{align*}
+        w_{0j} = g(x_0, y_j)&\text{ and }w_{nj} = g(x_n, y_j) \;\forall\;j=0,1,\dots,m\\
+        w_{i0} = g(x_i, y_0)&\text{ and }w_{im} = g(x_i, y_m) \;\forall\;i=0,1,\dots,n
+    \end{align*}
+    \section{Results}
+    \subsection{Example 1}
     \newpage 
     \bibliographystyle{plain}
     \bibliography{refs}{}
