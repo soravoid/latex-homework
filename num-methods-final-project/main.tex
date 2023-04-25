@@ -5,11 +5,12 @@
 \usepackage{fancyhdr}
 \usepackage{setspace}
 \usepackage{titlesec}
-\usepackage{mathptmx}
 \usepackage{cite}
 
 % For equations
 \usepackage{amsmath, amssymb}
+\usepackage{physics}
+\usepackage{newtxtext, newtxmath}
 
 \newcommand{\mytitle}{Numerical Solutions to Elliptical Partial Differential Equations}
 
@@ -25,7 +26,7 @@
 \setlength{\headheight}{15pt}
 
 \setlength{\parskip}{\lineskip}
-\titleformat{\section}{\normalfont\fontsize{12}{\lineskip}\bfseries}{\thesection}{1em}{}
+\titleformat{\section}{\normalfont\fontsize{15.6}{15.6}\bfseries}{\thesection}{1em}{}
 \titlespacing{\section}{0pt}{\parskip}{-\parskip}
 
 \doublespacing
@@ -47,6 +48,26 @@
     otherwise, if $D = 0$, then the equation is \textbf{parabolic}. As \textit{a}, \textit{b}, and \textit{c} are functions of \textit{x} and \textit{y},
     the type of PDE represented by Equation~(\ref{eq:pde}) can change types throughout the domain of the solution function.
     This paper will focus on numerical solutions to differential equations to elliptical PDEs.  
+    \section*{Problem Statement}
+    In this paper, we will specifically focus on the \textbf{Poisson~equation}~\cite{burden_faires_2011}, which is given by
+    \begin{equation}\label{eq:poisson}
+        \grad^2 u(x,y) \equiv \pdv[2]{u}{x}~(x,y) + \pdv[2]{u}{y}~(x,y) = f(x,y)
+    \end{equation}
+    where $\grad = \text{grad}f = \hat{\imath}\pdv{x} + \hat{\jmath}\pdv{y}$ and $\grad^2 = \grad \cdot \grad = \hat{\imath}\pdv[2]{x} + \hat{\jmath}\pdv[2]{y}$.
+    In the case that Equation~(\ref{eq:poisson}) is homogenous (i.e., $f(x,y)=0$), then
+    \begin{equation}\label{eq:laplace}
+        \grad^2 u(x,y) = 0
+    \end{equation}
+    and Equation~(\ref{eq:laplace}) is called the \textbf{Laplace~equation}. Observe that since $b = 0$ and $a = c = 1$, 
+    the discriminant of Equation~(\ref{eq:poisson}) is $D=-1$, thus the Poisson equation is always elliptic in any domain.
+
+    Our goal is to approximate the solution to this PDE on the open rectangle 
+    \begin{equation*}
+        R = \left\{(x,y)\; |\; a < x < b,\; c < y < d\right\} \subset \mathbb{R}^2
+    \end{equation*}
+    Furthermore, we are also subject to boundary conditions $u(x,y) = g(x,y)\;\forall\:(x,y)\in S$, where \textit{S} is
+    the boundary of the rectangle \textit{R}. If we have that \textit{f} and \textit{g} are continuous on \textit{R}, then 
+    we are guarenteed a unique solution to Equation~(\ref{eq:poisson}).
     \newpage 
     \bibliographystyle{plain}
     \bibliography{refs}{}
