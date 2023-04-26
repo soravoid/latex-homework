@@ -6,6 +6,9 @@
 \usepackage{setspace}
 \usepackage{titlesec}
 \usepackage{graphicx}
+\usepackage{float}
+\usepackage{color}
+\usepackage{listings}
 \usepackage{cite}
 
 % For equations
@@ -14,6 +17,19 @@
 \usepackage{newtxtext, newtxmath}
 
 \newcommand{\mytitle}{Numerical Solutions to Elliptical Partial Differential Equations}
+
+\definecolor{verbgray}{gray}{0.9}
+
+% New code environment that is just the verbatim environment with color bg
+\lstnewenvironment{code}{
+    \lstset{backgroundcolor=\color{verbgray},
+    frame=single,
+    framerule=0pt,
+    basicstyle=\ttfamily,
+    columns=fullflexible}
+}{}
+
+\definecolor{shadecolor}{rgb}{.9, .9, .9}
 
 \title{\mytitle}
 \author{Jaden Nola}
@@ -70,7 +86,7 @@
     \end{equation*}
     Furthermore, we are also subject to boundary conditions $u(x,y) = g(x,y)\;\forall\:(x,y)\in S$, where \textit{S} is
     the boundary of the rectangle \textit{R}. If we have that \textit{f} and \textit{g} are continuous on \textit{R}, then 
-    we are guarenteed a unique solution to Equation~(\ref{eq:poisson}).
+    we are guaranteed a unique solution to Equation~(\ref{eq:poisson}).
     \section{Method}
     This section will outline the method described in \cite{burden_faires_2011}. Similar to our methods of approximating linear ordinary differential equations, we will split our rectangle into
     $n+1$ subintervals along the \textit{x}-direction and $m+1$ subintervals of equal length along the \textit{y}-direction, where $m,n \in \mathbb{N}$.
@@ -94,7 +110,7 @@
     \normalsize
     Without loss of generality, we assume $\pdv[4]{u}{x}~(\xi_i, y_j) \leq \pdv[4]{u}{x}~(\eta_i, y_j)$. Since $\pdv[4]{u}{x}~(x,y)$ is continuous and
     \begin{equation*}
-        \pdv[4]{u}{x}~(\xi_i, y_j) \leq \frac{\pdv[4]{u}{x}~(\xi_i, y_j) + \pdv[4]{u}{x}~(\eta_i, y_j)}{2} \leq \pdv[4]{u}{x}~(\eta_i, y_j)
+        \pdv[4]{u}{x}~(\xi_i, y_j) \leq \frac{\pdv[4]{u}{x}~(\xi_i, y_j) + \pdv[4]{u}{x}~(\eta_i, y_j)}{2} \leq \pdv[4]{u}{x}~(\eta_i, y_j),
     \end{equation*}
     by the Intermediate Value theorem, there exists $\theta_i \in (x_i - h, x_i + h)$ such that
     \begin{equation*}
@@ -125,7 +141,7 @@
     This ensures that our numerical solution is correct along the borders of our rectangle \textit{R}.
 
     A rearrangement of Equation~(\ref{eq:approx_poisson}) yields the following:
-    \begin{equation}
+    \begin{equation}\label{eq:pde_finite_diff}
         2\left[\left(\frac{h}{k}\right)^2 + 1\right]w_{ij} - (w_{i+1,j} + w_{i-1,j})-\left(\frac{h}{k}\right)^2 (w_{i,j+1}+w_{i,j-1}) = -h^2f(x,y)
     \end{equation}
     where $w_{ij}\approx u(x_i, y_j)$. It follows that our boundary conditions from Equation~(\ref{eq:bound_conds}) becomes
@@ -133,8 +149,103 @@
         w_{0j} = g(x_0, y_j)&\text{ and }w_{nj} = g(x_n, y_j) \;\forall\;j=0,1,\dots,m\\
         w_{i0} = g(x_i, y_0)&\text{ and }w_{im} = g(x_i, y_m) \;\forall\;i=0,1,\dots,n
     \end{align*}
+    Since we used the centered-difference formula twice, this method has an error of $O(h^2 + k^2)$.
+
+    It is desirable to relabel the mesh points for notational convenience. In particular, we will use the following map of $\mathbb{N}^2 \to \mathbb{N}$:
+    \begin{equation}
+        P(i,j) = (m-1)(i-1) + j
+    \end{equation} 
+    for $i=1,2,\dots,n-1$ and $j=1,2,\dots,m-1$. Intuitively, we are counting the mesh points from left to right and top to bottom, as seen in Figure~(\ref{fig:intuitive_grid}).
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\linewidth]{intuitive_grid.png}
+        \caption{Visualization of counting mesh points, from~\cite{burden_faires_2011}}\label{fig:intuitive_grid}
+    \end{figure}
+    This new labeling convention allows us to relabel our points $w_{ij} = w_l$. Finally, Equation~(\ref{eq:pde_finite_diff}) with $i=1,2,\dots,n-1$ and $j=1,2,\dots,m-1$
+    gives us a system of $(n-1)(m-1)$ equations with $(n-1)(m-1)$ unknowns, which can be solved using Gaussian elimination or other techniques. A sample MATLAB implementation
+    has been given in Appendix A.
     \section{Results}
     \subsection{Example 1}
+    Our first problem will be to find the steady state heat distribution of a thin square metal plate, the solution of which is given by Equation~(\ref{eq:laplace}), the Laplace equation.
+    For convenience, we will take our region to be $R = \left\{(x,y)\; |\; 0 \leq x \leq 0.5,\;0\leq y \leq 0.5\right\}$. The boundary conditions are as follows:
+    \begin{itemize}
+        \item Two adjacent side
+    \end{itemize}
+    \newpage
+    \section*{Appendix A\@: MATLAB Implementation}
+    {\singlespacing
+        \begin{code}
+function [xdisp, ydisp, u] = myPoisson(f, g, a, b, c, d, n, m)
+    % Return numerical solutions of the Poisson PDE at mesh points.
+    % The PDE is of the form $u_{xx} + u_{yy} = f(x,y)$
+    %
+    % Params:
+    % f - Function that takes in two arguments
+    % g - Function that provides B.C. along x=a, x=b, y=c, y=d
+    % a - Left bound of rectangle
+    % b - Right bound of rectangle
+    % c - Lower bound of rectangle
+    % d - Upper bound of rectangle
+    %
+    % Returns a table of the approximated solutions of u at (x,y)
+    if (a > b) || (c > d)
+        error("Invalid rectangle bounds.")
+    end
+    if (n < 1) || (m < 1)
+        error("Invalid value for n or m.")
+    end
+    h=(b-a)/n; k=(d-c)/m;
+    x = (a:h:b)'; y = (c:k:d)';
+    num_side = (n-1)*(m-1);
+    xdisp = zeros(num_side, 1);
+    ydisp = zeros(num_side, 1);
+    u = zeros(num_side, 1);
+    coeffs = zeros(num_side);
+    b = zeros(num_side, 1);
+    b(index(1,1:m-1)) = b(index(1,1:m-1))+g(x(1),y(2:m));
+    b(index(1:n-1,1)) = b(index(1:n-1,1))+(((h/k)^2)*g(x(2:n),y(1)));
+    b(index(n-1,1:m-1)) = b(index(n-1,1:m-1))+g(x(n+1), y(2:m));
+    b(index(1:n-1,m-1)) = b(index(1:n-1,m-1))+(((h/k)^2)*g(x(2:n),y(m+1)));
+    row = 1;
+    for i=1:n-1
+        for j=1:m-1
+            b(row) = b(row) + -h^2 * f(x(i+1), y(j+1));
+            coeffs(row,index(i,j)) = 2*((h/k)^2 + 1);
+            if i ~= 1
+                coeffs(row,index(i-1,j)) = -1;
+            end
+            if j ~= 1
+                coeffs(row,index(i,j-1)) = -(h/k)^2;
+            end
+            if i ~= n-1
+                coeffs(row,index(i+1,j)) = -1;
+            end
+            if j ~= m-1
+                coeffs(row,index(i,j+1)) = -(h/k)^2;
+            end
+            row = row + 1;
+        end
+    end
+    w = coeffs\b;
+    row1 = 1;
+    for i=1:n-1
+        for j=1:m-1
+            l = index(i,j);
+            xdisp(row1) = x(i+1);
+            ydisp(row1) = y(j+1);
+            u(row1) = w(l);
+            row1 = row1 + 1;
+        end
+    end
+
+    function l = index(i, j)
+        % Helper function to map mesh point indices to natural numbers
+        % 1 <= i <= n-1, 1 <= j <= m-1
+        l = (m-1)*(i-1) + j;
+    end
+end
+        \end{code}
+    }
     \newpage 
     \bibliographystyle{plain}
     \bibliography{refs}{}
