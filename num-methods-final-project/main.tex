@@ -88,7 +88,7 @@
     the boundary of the rectangle \textit{R}. If we have that \textit{f} and \textit{g} are continuous on \textit{R}, then 
     we are guaranteed a unique solution to Equation~(\ref{eq:poisson}).
     \section{Method}
-    This section will outline the method described in \cite{burden_faires_2011}. Similar to our methods of approximating linear ordinary differential equations, we will split our rectangle into
+    This section will outline the method described in~\cite{burden_faires_2011}. Similar to our methods of approximating linear ordinary differential equations, we will split our rectangle into
     $n+1$ subintervals along the \textit{x}-direction and $m+1$ subintervals of equal length along the \textit{y}-direction, where $m,n \in \mathbb{N}$.
     Thus, we define $h=(b-a)/n$ and $k=(d-c)/m$, which gives $x_i = a  + ih,\; i=0,1,\dots,n$ and $y_j = c + kj, \; k=0,1,\dots,m$. These $(n+1)(m+1)$ points
     form the border and intersections of our \textbf{grid}. In our grid, there are $(n-1)(m-1)$ points that do not lie on the border, which we will call \textbf{mesh points}.
@@ -152,8 +152,8 @@
     Since we used the centered-difference formula twice, this method has an error of $O(h^2 + k^2)$.
 
     It is desirable to relabel the mesh points for notational convenience. In particular, we will use the following map of $\mathbb{N}^2 \to \mathbb{N}$:
-    \begin{equation}
-        P(i,j) = (m-1)(i-1) + j
+    \begin{equation}\label{eq:counting}
+        P(i,j) = (m-1)(i-1) + m-j
     \end{equation} 
     for $i=1,2,\dots,n-1$ and $j=1,2,\dots,m-1$. Intuitively, we are counting the mesh points from left to right and top to bottom, as seen in Figure~(\ref{fig:intuitive_grid}).
     \begin{figure}[H]
@@ -165,12 +165,85 @@
     gives us a system of $(n-1)(m-1)$ equations with $(n-1)(m-1)$ unknowns, which can be solved using Gaussian elimination or other techniques. A sample MATLAB implementation
     has been given in Appendix A.
     \section{Results}
-    \subsection{Example 1}
-    Our first problem will be to find the steady state heat distribution of a thin square metal plate, the solution of which is given by Equation~(\ref{eq:laplace}), the Laplace equation.
-    For convenience, we will take our region to be $R = \left\{(x,y)\; |\; 0 \leq x \leq 0.5,\;0\leq y \leq 0.5\right\}$. The boundary conditions are as follows:
-    \begin{itemize}
-        \item Two adjacent side
-    \end{itemize}
+    Our problem will be to find the steady state heat distribution of a 0.5 m x 0.5 m thin square metal plate. Two adjacent sides are held at $0^{\circ}$C and the remaining two sides
+    increase in temperature linearly until they meet at $100^{\circ}$C. For this problem, we will use $n=m=4$.
+
+    The solution to this distribution is given by Equation~(\ref{eq:laplace}), the Laplace equation.
+    For convenience, we will take our region to be $R = \left\{(x,y)\; |\; 0 \leq x \leq 0.5,\;0\leq y \leq 0.5\right\}$.
+    The boundary conditions can be realized as follows:
+    \begin{equation}
+        \begin{split}
+            u(0,y) = 0 &\text{ and } u(x, 0) = 0\\
+            u(0.5,y) = 200y &\text{ and } u(x, 0.5) = 200x
+        \end{split}
+    \end{equation}
+    To show the process explicitly, we will use $n=m=4$. Evaluating Equation~(\ref{eq:pde_finite_diff}) for $i=1,2,3$ and $j=1,2,3$, we have
+
+    {\singlespacing
+        \begin{align*}
+            4w_{11} - w_{21} - w_{01} - w_{12} - w_{10} &= 0\\
+            4w_{12} - w_{22} - w_{02} - w_{13} - w_{11} &= 0\\
+            4w_{13} - w_{23} - w_{03} - w_{14} - w_{12} &= 0\\
+            4w_{21} - w_{31} - w_{11} - w_{22} - w_{20} &= 0\\
+            4w_{22} - w_{32} - w_{12} - w_{23} - w_{21} &= 0\\
+            4w_{23} - w_{33} - w_{13} - w_{24} - w_{22} &= 0\\
+            2w_{31} - w_{41} - w_{21} - w_{32} - w_{40} &= 0\\
+            2w_{32} - w_{42} - w_{22} - w_{33} - w_{41} &= 0\\
+            2w_{33} - w_{43} - w_{23} - w_{34} - w_{42} &= 0\\
+        \end{align*}
+    }
+    Rewriting this system using our labelling convention according to Equation~(\ref{eq:counting}), we find
+    {\singlespacing
+        \begin{equation}\label{eq:heat_distr}
+            \begin{split}
+                -w_2 + 4w_3 -w_6 &= 25\\
+                -w_1 + 4w_2 - w_3 - w_5 &= 0\\
+                4w_1 - w_2 - w_4 &= 0\\
+                -w_3-w_5+4w_6-w_9 &= 50\\
+                -w_2 - w_4 + 4w_5 - w_6 - w_8 &= 0\\
+                -w_1 + 4w_4 -w_5 -w_7 &= 0\\
+                -w_6 - w_8 + 4w_9 &= 150\\
+                -w_5 - w_7 + 4w_8 -w_9 &= 50\\
+                -w_4 + 4w_7 - w_8 &= 25
+            \end{split}
+        \end{equation}
+    }
+
+    where we evaluated all variables of the form $w_{0j}, w_{i0}, w_{nj}, \text{ and } w_{im}$ according to the boundary conditions and
+    moved them to the right-hand side of the equation. The matrix of coefficients is nonsingnular, so we can use Gaussian elimination to solve this system, which yields
+    
+    {\singlespacing
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{|| c | c ||}
+                \hline
+                \textit{l} & $w_{l}$\\
+                \hline
+                \hline
+                1 & 18.75\\
+                2 & 12.5\\
+                3 & 6.25\\
+                4 & 37.5\\
+                5 & 25\\
+                6 & 12.5\\
+                7 & 56.25\\
+                8 & 37.5\\
+                9 & 18.75\\
+                \hline
+                \hline
+            \end{tabular}
+            \caption{Results from solving the system in Equation~(\ref{eq:heat_distr})}
+        \end{table}
+    }
+
+    Here we note that all the solutions to this PDE are exact since the solution is $u(x,y)=400xy$, so
+    $\pdv[4]{u}{x} = \pdv[4]{u}{y}=0$, making our error zero.
+    \section{Conclusion}
+    While this method is a promising start to solving the Poisson equation, it lacks the accuracy that is required for
+    some problems. In particular, this method could be improved using the iterative method involving the Gauss-Seidal algorithm, as demonstrated in \cite{burden_faires_2011},
+    or an application of the classical fourth-order Runge-Kutta method could suffice. In total, this paper has demonstrated
+    the feasibility to solving the Poisson equation, an elliptical PDE, and has provided a crude method of implementation as
+    a proof-of-concept. 
     \newpage
     \section*{Appendix A\@: MATLAB Implementation}
     {\singlespacing
@@ -241,7 +314,7 @@ function [xdisp, ydisp, u] = myPoisson(f, g, a, b, c, d, n, m)
     function l = index(i, j)
         % Helper function to map mesh point indices to natural numbers
         % 1 <= i <= n-1, 1 <= j <= m-1
-        l = (m-1)*(i-1) + j;
+        l = (m-1)*(i-1)+m-j;
     end
 end
         \end{code}
