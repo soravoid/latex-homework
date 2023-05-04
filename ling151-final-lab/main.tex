@@ -1,18 +1,109 @@
-\documentclass[12pt, titlepage]{article}
+\documentclass[12pt]{article}
 
 % For formatting
 \usepackage[margin=1truein]{geometry}
 \usepackage{fancyhdr}
 \usepackage{setspace}
 \usepackage{titlesec}
-\usepackage{graphicx}
-\usepackage{cite}
+\usepackage{indentfirst}
 
-\title{TBD}
-\author{Jaden Nola}
-\date{2 May 2023}
+\usepackage[style=apa, backend=biber]{biblatex}
+\addbibresource{refs.bib}
+
+% Font
+\usepackage{newtxtext}
+
+% For starting the page number on the title page
+\usepackage{etoolbox}
+\patchcmd{\titlepage}
+    {\thispagestyle{empty}}
+    {\thispagestyle{fancy}}
+    {}
+    {}
+
+\titleformat*{\section}{\centering\normalsize\bfseries}
+\titlespacing*{\section}{0pt}{0pt}{0pt}
+\titleformat*{\subsection}{\normalsize\bfseries}
+\titlespacing*{\subsection}{0pt}{0pt}{0pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\setlength{\headheight}{15pt}
 
 \onehalfspacing
 \begin{document}
-    \maketitle
+    \input{mytitlepage}
+    \setcounter{page}{2}
+    {\centering
+      \textbf{An Application of Grice's Maxims of Conversation to Ownership 
+        in Rust}\par
+    }
+    Why are programming languages not considered bonafide language? Although
+    they resemble human language, they lack certain design features that we
+    usually find in natural language. However, the extent to which programming
+    languages resemble natural language is an interesting discussion. This
+    paper will attempt to apply Grice's maxims of conversation to the concept
+    of ownership in the Rust programming language.
+    \section*{Background}
+    \subsection*{Grice's Maxims of Conversation}
+    According to \textcite[pp.\@~280-283]{dawson_phelan_2016}, H. P. Grice
+    described maxims of conversation that kept discourse coherent, maxims
+    which were put into four categories. The \textit{maxims of quality} are
+    the expectation that participants in a conversation provide, at least 
+    according to their current knowledge, truthful information. The 
+    \textit{maxims of relevance} describe that utterances in conversation 
+    should be relevant, as the name implies. The \textit{maxims of quantity}
+    dictate that speakers should not give too little nor too much
+    information. Finally, the \textit{maxims of manner} require that
+    information is given in a direct and easily understood manner.
+    \subsection*{Ownership in Rust}
+    Memory management poses a difficult challenge for creators of programming
+    languages, as this process may influence future idiomatic practices or
+    affect the performance of the language. Rust is a relatively new
+    programming language which boasts more effective memory safety due to its
+    ownership model, a unique memory management 
+    process~\autocite{rust_website}.  This model is most aptly explained by an
+    analogy.
+    
+    Consider the following sentence: "My dog, \textit{who is the same breed}
+    \textit{as the dog we saw chasing the squirrel}, drank water this
+    morning." We have three entities in this sentence: the speaker's dog,
+    the squirrel, and the dog chasing the squirrel; however, the squirrel and
+    the dog chasing the squirrel only exist within the dependent clause while
+    the speaker's dog exists throughout the entire phrase. For the sake of
+    analogy, we will say that the squirrel and the squirrel-chasing dog 
+    \textit{belong} to the dependent clause. Data works similarly in Rust,
+    where they no longer exist after their \textit{scope}~(dependent~clause)
+    is finished executing. In this system, variables can give ownership of
+    their data to variables in other scopes, keeping the data from being
+    lost.
+
+    Here we will also briefly define references, as they pertain to memory
+    management. While variables can hold values, they can also hold memory
+    addresses called \textit{references}, which allow indirect access to the
+    value. This fits into the ownership model as other scopes can be given
+    references to a variable instead of the variable itself. When those scopes
+    end, only the reference will be thrown out and not the value. It is
+    easily understood that references cannot exist when the value it
+    references has been thrown out. We should also note that references
+    introduce a problem: simultaneous access to the same value. This could
+    result in one scope j
+    \section*{Research Question}
+    How do ownership rules in Rust resemble or enforce Grice's maxims of
+    conversation?
+    \section*{Methodology}
+    Compiled from \textcite{rust_ownership} and \textcite{rust_references}
+    \begin{itemize}
+        \item A variable cannot write to its data if there is a reference
+            pointing to the data
+        \item A variable cannot be accessed if there is a mutable reference
+            pointing to the data
+        \item Data must outlive all of its references
+        \item Do not make a reference unnecessarily mutable
+        \item 
+    \end{itemize}
+    \newpage
+    \printbibliography
 \end{document}
